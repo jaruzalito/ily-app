@@ -9,9 +9,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'logo.png', 'favicon-96x96.png'],
       manifest: {
-        name: 'Ily - Nasza Historia',
+        name: 'Ily<3',
         short_name: 'Ily',
-        description: 'Nasza wyjątkowa historia miłości',
+        description: 'kicie',
         theme_color: '#ff6b9d',
         background_color: '#fff0f6',
         display: 'standalone',
