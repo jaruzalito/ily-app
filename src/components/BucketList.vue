@@ -5,9 +5,6 @@
       <div v-if="loading" class="sync-status loading">
         ⏳ Synchronizacja...
       </div>
-      <div v-else class="sync-status synced">
-        ✓ Zsynchronizowane
-      </div>
     </div>
 
     <!-- NOWY LAYOUT - 2 wiersze dla mobile -->

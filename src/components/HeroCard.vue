@@ -39,10 +39,6 @@
         <!-- Licznik zdjęć -->
         <div class="photo-counter">{{ currentPhotoIndex + 1 }} / {{ photos.length }}</div>
 
-        <!-- Wskaźnik synchronizacji -->
-        <div class="sync-indicator" :class="{ syncing: uploading }">
-          {{ uploading ? '☁️ Wysyłanie...' : '✓ Zsynchronizowane' }}
-        </div>
 
         <!-- Przycisk usuwania zdjęcia -->
         <button @click="deleteCurrentPhoto" class="delete-photo-btn" title="Usuń to zdjęcie">

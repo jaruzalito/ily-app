@@ -161,8 +161,264 @@ const quotes = [
     source: '35'
   },
   {
-    text: 'kocham jak mi opowiadasz co robiłaś',
+    text: 'kocham jak mi opowiadasz różne historie',
     source: '36'
+  },
+  {
+    text: 'kocham cię słuchać',
+    source: '37'
+  },
+  {
+    text: 'kocham jak dzwonisz podpita',
+    source: '38'
+  },
+  {
+    text: 'kocham jak na mnie czekasz aż wrócę',
+    source: '39'
+  },
+  {
+    text: 'kocham każdy spędzony z tobą dzień',
+    source: '40'
+  },
+  {
+    text: 'kocham to że mamy podobne podejście do wielu tematów',
+    source: '41'
+  },
+  {
+    text: 'kocham cię bo jesteś moją kicią',
+    source: '42'
+  },
+  {
+    text: 'kocham jak się zawstydzasz',
+    source: '43'
+  },
+  {
+    text: 'kocham moją żone',
+    source: '44'
+  },
+  {
+    text: 'kocham gangstera?',
+    source: '45'
+  },
+  {
+    text: 'kocham twoje wszystkie osobowości',
+    source: '46'
+  },
+  {
+    text: 'kocham cię za to że zwracasz uwagę na małe szczegóły',
+    source: '47'
+  },
+  {
+    text: 'kocham jak do mnie gadasz przez sen',
+    source: '48'
+  },
+  {
+    text: 'kocham pić z tobą wino',
+    source: '49'
+  },
+  {
+    text: 'kocham cię bo mi stale imponujesz czymś nowym',
+    source: '50'
+  },
+  {
+    text: 'kocham cię nawet jak nie masz humoru',
+    source: '51'
+  },
+  {
+    text: 'kocham cię za to że mnie wspierasz',
+    source: '52'
+  },
+  {
+    text: 'kocham jak się odklejasz i wtedy ja się odklejam',
+    source: '53'
+  },
+  {
+    text: 'kocham jak używasz moich słówek',
+    source: '54'
+  },
+  {
+    text: 'kocham myśleć o naszej przyszłości',
+    source: '55'
+  },
+  {
+    text: 'kocham moją czarną kicie',
+    source: '56'
+  },
+  {
+    text: 'kocham cię nawet jak cię wkurwiam',
+    source: '57'
+  },
+  {
+    text: 'kocham cię nawet jak nie rozmawiamy zbyt dużo',
+    source: '58'
+  },
+  {
+    text: 'kochamm trzymać za ciebie kciuki',
+    source: '59'
+  },
+  {
+    text: 'kocham różnice między naszymi charakterami',
+    source: '60'
+  },
+  {
+    text: 'kocham cię za to że mnie motywujesz do pracy',
+    source: '61'
+  },
+  {
+    text: 'kocham fakt, że i tak na siebie trafiliśmy',
+    source: '62'
+  },
+  {
+    text: 'kocham cię od dnia w którym się poznaliśmy',
+    source: '63'
+  },
+  {
+    text: 'kocham się do ciebie przytulać',
+    source: '64'
+  },
+  {
+    text: 'kocham twoje głupiutkie pomysły',
+    source: '65'
+  },
+  {
+    text: 'kocham fakt, że będe musiał farbować siwe włosy przed 30stka ',
+    source: '66'
+  },
+  {
+    text: 'kocham cie wkurwiać',
+    source: '67'
+  },
+  {
+    text: 'kocham cię za to jaka wytrzymała jesteś',
+    source: '68'
+  },
+  {
+    text: 'kocham twoje śliczne włosy',
+    source: '69'
+  },
+  {
+    text: 'kocham każdy milimetr twojego ciała',
+    source: '70'
+  },
+  {
+    text: 'kocham to jak inteligentną osobą jesteś',
+    source: '71'
+  },
+  {
+    text: 'kocham z tobą pisać jak mi się oczy kleją do spania',
+    source: '72'
+  },
+  {
+    text: 'kocham dowiadywać się jak coś wygląda z twojej perspektywy',
+    source: '73'
+  },
+  {
+    text: 'kocham smiać się z tobą',
+    source: '74'
+  },
+  {
+    text: 'kocham jak zapodajesz jakies girly ploty',
+    source: '75'
+  },
+  {
+    text: 'kocham jak wysyłasz mi swoje fotki',
+    source: '76'
+  },
+  {
+    text: 'kocham się z tobą zakładać żeby mieć motywację',
+    source: '77'
+  },
+  {
+    text: 'kocham to jak zabawna czasami jesteś',
+    source: '78'
+  },
+  {
+    text: 'kocham twój styl ubierania się',
+    source: '79'
+  },
+  {
+    text: 'kocham patrzeć jak się nad czymś skupiasz',
+    source: '80'
+  },
+  {
+    text: 'kocham jak miłą osobą potrafisz być',
+    source: '81'
+  },
+  {
+    text: 'kocham twój british accent brzmi cool',
+    source: '82'
+  },
+  {
+    text: 'kocham to jak zaradna potrafisz być',
+    source: '83'
+  },
+  {
+    text: 'kocham jak troszczysz się o swoich przyjaciół',
+    source: '84'
+  },
+  {
+    text: 'kocham jak powstrzymujesz się żeby nie wybuchnąć wkurwem',
+    source: '85'
+  },
+  {
+    text: 'kocham cię nawet jak masz problem bo i tak wiem, że sobie poradzisz',
+    source: '86'
+  },
+  {
+    text: 'kocham jak śpiewasz(nawet mendesa :pp)',
+    source: '87'
+  },
+  {
+    text: 'kocham jak dbasz o nasze wspólne fotki',
+    source: '88'
+  },
+  {
+    text: 'kocham brać z tobą snusa',
+    source: '89'
+  },
+  {
+    text: 'kocham cię i zrobiłbym wszystko dla ciebie',
+    source: '90'
+  },
+  {
+    text: 'kocham jak ci sie czasami uda uświadomić mnie, że nie mam racji',
+    source: '91'
+  },
+  {
+    text: 'kocham cię bo mimo, że masz dużo na głowie, to sobie ze wszystkim radzisz',
+    source: '92'
+  },
+  {
+    text: 'kocham kłaść sie spać po twoim dobranoc',
+    source: '93'
+  },
+  {
+    text: 'kocham cię i wiem, że sobie poradzisz w życiu',
+    source: '94'
+  },
+  {
+    text: 'kocham jak masz humor i ci uśmiech nie schodzi z twarzy',
+    source: '95'
+  },
+  {
+    text: 'kocham myć się z tobą',
+    source: '96'
+  },
+  {
+    text: 'kocham jak się zgadzasz na moje głupie pomysły',
+    source: '97'
+  },
+  {
+    text: 'kocham nasze wspólne plany',
+    source: '98'
+  },
+  {
+    text: 'kocham cię wika bo po prostu jesteś sobą',
+    source: '99'
+  },
+  {
+    text: 'kocham cię! kocham cię! kocham cię! I to się nigdy nie zmieni',
+    source: '100'
   },
 ]
 
