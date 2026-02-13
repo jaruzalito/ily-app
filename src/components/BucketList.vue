@@ -42,7 +42,7 @@
               :disabled="loading"
           >
             <span class="emoji">💕</span>
-            <span class="label">Ona</span>
+            <span class="label">Wika</span>
           </button>
           <button
               @click="selectedColor = 'blue'"
@@ -51,7 +51,7 @@
               :disabled="loading"
           >
             <span class="emoji">💙</span>
-            <span class="label">Ja</span>
+            <span class="label">Marcel</span>
           </button>
         </div>
       </div>
