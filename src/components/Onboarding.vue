@@ -7,8 +7,8 @@
     <div class="content">
       <transition name="fade-slide" mode="out-in">
         <div v-if="currentStep === 0" key="step0" class="step">
-          <h1 class="title">Cześć, kochanie 💕</h1>
-          <p class="subtitle">Mam dla Ciebie coś wyjątkowego...</p>
+          <h1 class="title">cześć kiciaa💕</h1>
+          <p class="subtitle">twój informatyk się troszkę postarał...</p>
           <button @click="nextStep" class="continue-btn">
             <span>Dotknij, żeby kontynuować</span>
             <span class="arrow">→</span>
@@ -17,9 +17,9 @@
 
         <div v-else-if="currentStep === 1" key="step1" class="step">
           <div class="emoji-large">🌟</div>
-          <h2 class="message">To jest nasza historia</h2>
+          <h2 class="message">chciałbym żebyś wiedziała że cię kochamm</h2>
           <p class="description">
-            Każda chwila z Tobą jest wyjątkowa
+            i...
           </p>
           <button @click="nextStep" class="continue-btn">
             <span>Dalej</span>
@@ -29,9 +29,9 @@
 
         <div v-else-if="currentStep === 2" key="step2" class="step">
           <div class="emoji-large">💝</div>
-          <h2 class="message">Od naszego pierwszego spotkania...</h2>
+          <h2 class="message">i tak myślałem że może nam czegoś brakuje</h2>
           <p class="description">
-            Każdy dzień z Tobą jest jak prezent
+            cat thinkin' hardly😺❓
           </p>
           <button @click="nextStep" class="continue-btn">
             <span>Dalej</span>
@@ -41,9 +41,9 @@
 
         <div v-else-if="currentStep === 3" key="step3" class="step">
           <div class="emoji-large">✨</div>
-          <h2 class="message">Stworzyłem to specjalnie dla Ciebie</h2>
+          <h2 class="message">i wtedy wpadłem na mega pomysł</h2>
           <p class="description">
-            Miejsce, gdzie możemy śledzić naszą wspólną drogę
+            a co jeśli??
           </p>
           <button @click="nextStep" class="continue-btn">
             <span>Dalej</span>
@@ -53,9 +53,9 @@
 
         <div v-else-if="currentStep === 4" key="step4" class="step">
           <div class="emoji-large animated-heart">💗</div>
-          <h2 class="message">Bo kocham Cię najbardziej na świecie</h2>
+          <h2 class="message">a co jeśli brakuje nam wspólnej apki?</h2>
           <p class="description">
-            I chcę dzielić z Tobą każdą chwilę
+            tak wiemm mega sprytne czapki z głów
           </p>
           <button @click="finish" class="continue-btn final-btn">
             <span>Zobacz naszą historię</span>

@@ -100,7 +100,70 @@ const quotes = [
     text: 'kocham myśleć o tobie',
     source: '20'
   },
-
+  {
+    text: 'kocham ćwiczyć na tobie masaż',
+    source: '21'
+  },
+  {
+    text: 'kocham jak się do mnie przytulasz',
+    source: '22'
+  },
+  {
+    text: 'kocham to jak na mnie patrzysz frfr',
+    source: '23'
+  },
+  {
+    text: 'kocham cię za twoją pomysłowość',
+    source: '24'
+  },
+  {
+    text: 'kocham myśleć o tobie',
+    source: '25'
+  },
+  {
+    text: 'kocham cię brudasie<3',
+    source: '26'
+  },
+  {
+    text: 'kocham jak nazywasz mnie informatykiem',
+    source: '27'
+  },
+  {
+    text: 'kocham to jak sobie dobrze radzisz',
+    source: '28'
+  },
+  {
+    text: 'kocham cię i jestem z ciebie dumny',
+    source: '29'
+  },
+  {
+    text: 'kocham twoje oczka',
+    source: '30'
+  },
+  {
+    text: 'kocham twoje piegi jak się opalisz',
+    source: '31'
+  },
+  {
+    text: 'kocham twoje całe 160+3cm wzrostu',
+    source: '32'
+  },
+  {
+    text: 'kocham twój charakter',
+    source: '33'
+  },
+  {
+    text: 'kocham to jak łatwo się godzimy po kłótni',
+    source: '34'
+  },
+  {
+    text: 'kocham dowiadywać się nowych rzeczy o tobie',
+    source: '35'
+  },
+  {
+    text: 'kocham jak mi opowiadasz co robiłaś',
+    source: '36'
+  },
 ]
 
 const currentQuoteIndex = ref(0)
