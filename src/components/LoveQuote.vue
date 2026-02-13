@@ -419,7 +419,7 @@ const quotes = [
   {
     text: 'kocham cię! kocham cię! kocham cię! I to się nigdy nie zmieni',
     source: '100'
-  },
+  }
 ]
 
 const currentQuoteIndex = ref(0)
