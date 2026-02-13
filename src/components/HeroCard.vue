@@ -1,6 +1,12 @@
 <template>
   <div class="hero-card">
     <div class="photo-container">
+      <!-- Wskaźnik ładowania -->
+      <div v-if="loading" class="loading-overlay">
+        <div class="spinner">⏳</div>
+        <p>Ładowanie zdjęć...</p>
+      </div>
+
       <!-- Galeria zdjęć -->
       <div v-if="photos.length > 0" class="photo-gallery">
         <img :src="photos[currentPhotoIndex]" alt="Nasze zdjęcie" class="photo" />
@@ -33,6 +39,11 @@
         <!-- Licznik zdjęć -->
         <div class="photo-counter">{{ currentPhotoIndex + 1 }} / {{ photos.length }}</div>
 
+        <!-- Wskaźnik synchronizacji -->
+        <div class="sync-indicator" :class="{ syncing: uploading }">
+          {{ uploading ? '☁️ Wysyłanie...' : '✓ Zsynchronizowane' }}
+        </div>
+
         <!-- Przycisk usuwania zdjęcia -->
         <button @click="deleteCurrentPhoto" class="delete-photo-btn" title="Usuń to zdjęcie">
           🗑️
@@ -40,14 +51,20 @@
       </div>
 
       <!-- Placeholder gdy brak zdjęć -->
-      <div v-else class="photo-placeholder">
+      <div v-else-if="!loading" class="photo-placeholder">
         <div class="icon">📷</div>
-        <p class="upload-text">Dodajmy wspólne zdjęcia here</p>
+        <p class="upload-text">Dodajmy wspólne zdjęcia tutaj</p>
+        <p class="sync-info">✨ Zdjęcia są widoczne dla nas obu!</p>
       </div>
 
       <!-- Przycisk dodawania zdjęć (zawsze widoczny) -->
-      <button @click="$refs.fileInput.click()" class="add-photo-btn" :class="{ 'has-photos': photos.length > 0 }">
-        <span class="plus-icon">+</span>
+      <button
+          @click="$refs.fileInput.click()"
+          class="add-photo-btn"
+          :class="{ 'has-photos': photos.length > 0 }"
+          :disabled="uploading"
+      >
+        <span class="plus-icon">{{ uploading ? '⏳' : '+' }}</span>
       </button>
 
       <input
@@ -68,23 +85,37 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted} from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
+import { usePhotos } from '../composables/useSupabase'
 
-const photos = ref([])
 const currentPhotoIndex = ref(0)
 const fileInput = ref(null)
-const autoPlayInterval = ref(null) // ← DODAJ TO
+const autoPlayInterval = ref(null)
 const isAutoPlaying = ref(true)
+const uploading = ref(false)
+
+// Supabase composable
+const {
+  photos,
+  loading,
+  error,
+  fetchPhotos,
+  addPhoto,
+  deletePhoto,
+  subscribeToPhotos
+} = usePhotos()
+
 // CUSTOMIZE THESE VALUES!
 const coupleName = 'Ty i Ja'
+
 const startAutoPlay = () => {
   if (photos.value.length > 1) {
-    stopAutoPlay() // Zatrzymaj poprzedni interval jeśli istnieje
+    stopAutoPlay()
     autoPlayInterval.value = setInterval(() => {
       if (isAutoPlaying.value) {
         nextPhoto()
       }
-    }, 10000) // 10000ms = 10 sekund
+    }, 10000) // 10 sekund
   }
 }
 
@@ -101,42 +132,69 @@ const toggleAutoPlay = () => {
     startAutoPlay()
   }
 }
-onMounted(() => {
-  const savedPhotos = localStorage.getItem('couplePhotos')
-  if (savedPhotos) {
-    photos.value = JSON.parse(savedPhotos)
-  }
+
+let unsubscribe = null
+
+onMounted(async () => {
+  console.log('🚀 Inicjalizacja HeroCard...')
+
+  // Pobierz zdjęcia z bazy danych
+  await fetchPhotos()
+
+  // Włącz realtime synchronizację
+  unsubscribe = subscribeToPhotos((payload) => {
+    console.log('📸 Nowe zdjęcie dodane przez partnera!', payload)
+    // Można dodać powiadomienie toast tutaj
+  })
+
+  // Uruchom autoplay
   startAutoPlay()
 })
 
-
 onUnmounted(() => {
-  stopAutoPlay() // Wyczyść interval gdy komponent jest niszczony
+  stopAutoPlay()
+
+  // Odsubskrybuj od realtime
+  if (unsubscribe) {
+    unsubscribe()
+  }
 })
 
-
-const handleImageUpload = (event) => {
+const handleImageUpload = async (event) => {
   const files = event.target.files
   if (files.length > 0) {
-    // Przetwórz wszystkie wybrane pliki
-    Array.from(files).forEach(file => {
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        photos.value.push(e.target.result)
-        saveToLocalStorage()
-        startAutoPlay()
-      }
-      reader.readAsDataURL(file)
-    })
+    uploading.value = true
 
-    // Reset input, żeby można było dodać te same zdjęcia ponownie
-    event.target.value = ''
+    try {
+      // Przetwórz wszystkie wybrane pliki
+      for (const file of Array.from(files)) {
+        // Konwertuj do base64
+        const base64 = await new Promise((resolve, reject) => {
+          const reader = new FileReader()
+          reader.onload = (e) => resolve(e.target.result)
+          reader.onerror = reject
+          reader.readAsDataURL(file)
+        })
+
+        // Dodaj do Supabase
+        await addPhoto(base64)
+      }
+
+      console.log('✅ Wszystkie zdjęcia dodane!')
+      startAutoPlay()
+    } catch (err) {
+      console.error('❌ Błąd podczas dodawania zdjęć:', err)
+      alert('Wystąpił błąd podczas dodawania zdjęć. Spróbuj ponownie.')
+    } finally {
+      uploading.value = false
+      // Reset input
+      event.target.value = ''
+    }
   }
 }
 
 const nextPhoto = () => {
   currentPhotoIndex.value = (currentPhotoIndex.value + 1) % photos.value.length
-  // Zrestartuj timer po manualnej zmianie
   if (isAutoPlaying.value) {
     startAutoPlay()
   }
@@ -146,27 +204,30 @@ const previousPhoto = () => {
   currentPhotoIndex.value = currentPhotoIndex.value === 0
       ? photos.value.length - 1
       : currentPhotoIndex.value - 1
-  // Zrestartuj timer po manualnej zmianie
   if (isAutoPlaying.value) {
     startAutoPlay()
   }
 }
 
-const deleteCurrentPhoto = () => {
-  if (confirm('Czy na pewno chcesz usunąć to zdjęcie?')) {
-    photos.value.splice(currentPhotoIndex.value, 1)
+const deleteCurrentPhoto = async () => {
+  if (confirm('Czy na pewno chcesz usunąć to zdjęcie? Zostanie usunięte dla Was obojga.')) {
+    try {
+      const photoToDelete = photos.value[currentPhotoIndex.value]
 
-    // Dostosuj indeks jeśli to było ostatnie zdjęcie
-    if (currentPhotoIndex.value >= photos.value.length && photos.value.length > 0) {
-      currentPhotoIndex.value = photos.value.length - 1
+      // Usuń z Supabase
+      await deletePhoto(photoToDelete)
+
+      // Dostosuj indeks jeśli to było ostatnie zdjęcie
+      if (currentPhotoIndex.value >= photos.value.length && photos.value.length > 0) {
+        currentPhotoIndex.value = photos.value.length - 1
+      }
+
+      console.log('✅ Zdjęcie usunięte!')
+    } catch (err) {
+      console.error('❌ Błąd podczas usuwania zdjęcia:', err)
+      alert('Wystąpił błąd podczas usuwania zdjęcia. Spróbuj ponownie.')
     }
-
-    saveToLocalStorage()
   }
-}
-
-const saveToLocalStorage = () => {
-  localStorage.setItem('couplePhotos', JSON.stringify(photos.value))
 }
 </script>
 
@@ -190,6 +251,33 @@ const saveToLocalStorage = () => {
   background: linear-gradient(135deg, rgba(255, 107, 157, 0.1), rgba(196, 113, 237, 0.1));
 }
 
+.loading-overlay {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  background: rgba(255, 255, 255, 0.9);
+  z-index: 100;
+}
+
+.spinner {
+  font-size: 3rem;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.loading-overlay p {
+  color: var(--primary);
+  font-weight: 500;
+}
+
 .photo-gallery {
   width: 100%;
   height: 100%;
@@ -210,7 +298,7 @@ const saveToLocalStorage = () => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
+  gap: 0.5rem;
 }
 
 .icon {
@@ -223,6 +311,35 @@ const saveToLocalStorage = () => {
   font-size: 0.9rem;
   text-align: center;
   padding: 0 1rem;
+}
+
+.sync-info {
+  color: var(--primary);
+  font-size: 0.8rem;
+  text-align: center;
+  padding: 0 1rem;
+  margin-top: 0.5rem;
+}
+
+/* Wskaźnik synchronizacji */
+.sync-indicator {
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(46, 213, 115, 0.9);
+  color: white;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  z-index: 5;
+  backdrop-filter: blur(4px);
+  transition: all 0.3s ease;
+}
+
+.sync-indicator.syncing {
+  background: rgba(255, 184, 0, 0.9);
 }
 
 /* Przycisk dodawania zdjęć */
@@ -247,31 +364,29 @@ const saveToLocalStorage = () => {
   z-index: 10;
 }
 
+.add-photo-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .add-photo-btn.has-photos {
   width: 50px;
   height: 50px;
   font-size: 1.8rem;
 }
 
-.add-photo-btn:hover {
+.add-photo-btn:hover:not(:disabled) {
   transform: scale(1.1) rotate(90deg);
   box-shadow: var(--shadow-hover);
 }
 
-.add-photo-btn:active {
+.add-photo-btn:active:not(:disabled) {
   transform: scale(1.05) rotate(90deg);
 }
 
 .plus-icon {
   line-height: 1;
   font-weight: 300;
-}
-
-.btn-text {
-  font-size: 0.7rem;
-  font-weight: 500;
-  margin-top: 0.25rem;
-  font-family: 'Poppins', sans-serif;
 }
 
 /* Strzałki nawigacji */
@@ -316,7 +431,7 @@ const saveToLocalStorage = () => {
 /* Wskaźniki (kropki) */
 .photo-indicators {
   position: absolute;
-  bottom: 1rem;
+  bottom: 4rem;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -405,12 +520,6 @@ const saveToLocalStorage = () => {
   font-size: 1.5rem;
   margin: 0.5rem 0;
   animation: heartbeat 2s ease-in-out infinite;
-}
-
-.tagline {
-  color: var(--text-secondary);
-  font-size: 1rem;
-  font-style: italic;
 }
 
 @keyframes fadeIn {

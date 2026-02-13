@@ -2,46 +2,56 @@
   <div class="bucket-list">
     <div class="bucket-header">
       <h2 class="bucket-title">Rzeczy które musimy razem zrobić</h2>
-      <p class="bucket-subtitle">
-
-      </p>
+      <div v-if="loading" class="sync-status loading">
+        ⏳ Synchronizacja...
+      </div>
+      <div v-else class="sync-status synced">
+        ✓ Zsynchronizowane
+      </div>
     </div>
 
     <div class="add-item-section">
-      <input 
-        v-model="newItemText" 
-        @keyup.enter="addItem"
-        type="text" 
-        placeholder="Dodaj nowy cel..." 
-        class="item-input"
+      <input
+          v-model="newItemText"
+          @keyup.enter="addItem"
+          type="text"
+          placeholder="Dodaj nowy cel..."
+          class="item-input"
+          :disabled="loading"
       />
       <div class="color-selector">
-        <button 
-          @click="selectedColor = 'pink'" 
-          class="color-btn pink"
-          :class="{ active: selectedColor === 'pink' }"
+        <button
+            @click="selectedColor = 'pink'"
+            class="color-btn pink"
+            :class="{ active: selectedColor === 'pink' }"
+            :disabled="loading"
         >
           💕
         </button>
-        <button 
-          @click="selectedColor = 'blue'" 
-          class="color-btn blue"
-          :class="{ active: selectedColor === 'blue' }"
+        <button
+            @click="selectedColor = 'blue'"
+            class="color-btn blue"
+            :class="{ active: selectedColor === 'blue' }"
+            :disabled="loading"
         >
           💙
         </button>
       </div>
-      <button @click="addItem" class="add-btn">
-        <span>+</span>
+      <button
+          @click="addItem"
+          class="add-btn"
+          :disabled="loading || !newItemText.trim()"
+      >
+        <span>{{ loading ? '⏳' : '+' }}</span>
       </button>
     </div>
 
     <transition-group name="list" tag="div" class="items-list">
-      <div 
-        v-for="item in bucketItems" 
-        :key="item.id"
-        class="bucket-item"
-        :class="[item.color, { completed: item.completed }]"
+      <div
+          v-for="item in bucketItems"
+          :key="item.id"
+          class="bucket-item"
+          :class="[item.color, { completed: item.completed }]"
       >
         <div class="item-content" @click="toggleItem(item.id)">
           <div class="checkbox">
@@ -52,15 +62,20 @@
             {{ item.color === 'pink' ? '💕' : '💙' }}
           </div>
         </div>
-        <button @click="removeItem(item.id)" class="delete-btn">
+        <button
+            @click="removeItem(item.id)"
+            class="delete-btn"
+            :disabled="loading"
+        >
           <span>×</span>
         </button>
       </div>
     </transition-group>
 
-    <div v-if="bucketItems.length === 0" class="empty-state">
+    <div v-if="bucketItems.length === 0 && !loading" class="empty-state">
       <div class="empty-icon">📝</div>
-      <p>Wspólne marzenia here!</p>
+      <p>Wspólne marzenia tutaj!</p>
+      <p class="sync-info">✨ Wszystko będzie synchronizowane między Wami!</p>
     </div>
 
     <div class="legend">
@@ -77,72 +92,126 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
+import { useBucketList } from '../composables/useSupabase'
 
-const bucketItems = ref([])
 const newItemText = ref('')
 const selectedColor = ref('pink')
 
-// Load items from localStorage on mount
-onMounted(() => {
-  const saved = localStorage.getItem('bucketList')
-  if (saved) {
-    bucketItems.value = JSON.parse(saved)
-  } else {
-    // Default items to start with
-    bucketItems.value = [
-      {
-        id: 1,
-        text: 'Sex?',
-        color: 'blue',
-        completed: false
-      },
-      {
-        id: 2,
-        text: 'Włochy!',
-        color: 'pink',
-        completed: true
-      },
-      {
-        id: 3,
-        text: 'Nowy rok razem',
-        color: 'pink',
-        completed: true
-      }
-    ]
-    saveToLocalStorage()
+// Supabase composable
+const {
+  bucketItems,
+  loading,
+  error,
+  fetchBucketItems,
+  addBucketItem,
+  updateBucketItem,
+  deleteBucketItem,
+  subscribeToBucketList
+} = useBucketList()
+
+let unsubscribe = null
+
+onMounted(async () => {
+  console.log('🚀 Inicjalizacja BucketList...')
+
+  // Pobierz bucket items z bazy danych
+  await fetchBucketItems()
+
+  // Jeśli baza jest pusta, dodaj domyślne items
+  if (bucketItems.value.length === 0) {
+    await addDefaultItems()
+  }
+
+  // Włącz realtime synchronizację
+  unsubscribe = subscribeToBucketList((payload) => {
+    console.log('📝 Bucket list zaktualizowana przez partnera!', payload)
+    // Można dodać powiadomienie toast tutaj
+  })
+})
+
+onUnmounted(() => {
+  // Odsubskrybuj od realtime
+  if (unsubscribe) {
+    unsubscribe()
   }
 })
 
-const addItem = () => {
-  if (newItemText.value.trim()) {
-    const newItem = {
+const addDefaultItems = async () => {
+  const defaultItems = [
+    {
       id: Date.now(),
-      text: newItemText.value.trim(),
-      color: selectedColor.value,
+      text: 'Sex?',
+      color: 'blue',
       completed: false
+    },
+    {
+      id: Date.now() + 1,
+      text: 'Włochy!',
+      color: 'pink',
+      completed: true
+    },
+    {
+      id: Date.now() + 2,
+      text: 'Nowy rok razem',
+      color: 'pink',
+      completed: true
     }
-    bucketItems.value.push(newItem)
-    newItemText.value = ''
-    saveToLocalStorage()
+  ]
+
+  for (const item of defaultItems) {
+    try {
+      await addBucketItem(item)
+    } catch (err) {
+      console.error('Błąd podczas dodawania domyślnego item:', err)
+    }
   }
 }
 
-const toggleItem = (id) => {
-  const item = bucketItems.value.find(i => i.id === id)
-  if (item) {
-    item.completed = !item.completed
-    saveToLocalStorage()
+const addItem = async () => {
+  if (newItemText.value.trim()) {
+    try {
+      const newItem = {
+        id: Date.now(), // Generuj ID po stronie klienta
+        text: newItemText.value.trim(),
+        color: selectedColor.value,
+        completed: false
+      }
+
+      await addBucketItem(newItem)
+
+      newItemText.value = ''
+      console.log('✅ Dodano nowy bucket item!')
+    } catch (err) {
+      console.error('❌ Błąd podczas dodawania bucket item:', err)
+      alert('Wystąpił błąd podczas dodawania. Spróbuj ponownie.')
+    }
   }
 }
 
-const removeItem = (id) => {
-  bucketItems.value = bucketItems.value.filter(i => i.id !== id)
-  saveToLocalStorage()
+const toggleItem = async (id) => {
+  try {
+    const item = bucketItems.value.find(i => i.id === id)
+    if (item) {
+      await updateBucketItem(id, { completed: !item.completed })
+      console.log('✅ Zaktualizowano bucket item!')
+    }
+  } catch (err) {
+    console.error('❌ Błąd podczas aktualizacji bucket item:', err)
+    alert('Wystąpił błąd podczas aktualizacji. Spróbuj ponownie.')
+  }
 }
 
-const saveToLocalStorage = () => {
-  localStorage.setItem('bucketList', JSON.stringify(bucketItems.value))
+const removeItem = async (id) => {
+  if (confirm('Czy na pewno chcesz usunąć ten cel? Zostanie usunięty dla Was obojga.')) {
+    try {
+      await deleteBucketItem(id)
+      console.log('✅ Usunięto bucket item!')
+    } catch (err) {
+      console.error('❌ Błąd podczas usuwania bucket item:', err)
+      alert('Wystąpił błąd podczas usuwania. Spróbuj ponownie.')
+    }
+  }
 }
 </script>
 
@@ -157,6 +226,7 @@ const saveToLocalStorage = () => {
   padding: 1.5rem;
   margin-bottom: 1rem;
   box-shadow: var(--shadow);
+  position: relative;
 }
 
 .bucket-title {
@@ -165,10 +235,30 @@ const saveToLocalStorage = () => {
   margin-bottom: 0.5rem;
 }
 
-.bucket-subtitle {
-  font-size: 0.9rem;
-  color: var(--text-light);
-  line-height: 1.5;
+.sync-status {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  font-size: 0.75rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+.sync-status.loading {
+  background: rgba(255, 184, 0, 0.2);
+  color: #f39c12;
+}
+
+.sync-status.synced {
+  background: rgba(46, 213, 115, 0.2);
+  color: #2ed573;
+}
+
+.sync-info {
+  color: var(--primary);
+  font-size: 0.8rem;
+  margin-top: 0.5rem;
 }
 
 .add-item-section {
@@ -193,6 +283,11 @@ const saveToLocalStorage = () => {
   transition: all 0.3s ease;
 }
 
+.item-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .item-input:focus {
   outline: none;
   border-color: var(--primary);
@@ -215,6 +310,11 @@ const saveToLocalStorage = () => {
   align-items: center;
   justify-content: center;
   transition: all 0.3s ease;
+}
+
+.color-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .color-btn.pink {
@@ -255,7 +355,12 @@ const saveToLocalStorage = () => {
   line-height: 1;
 }
 
-.add-btn:hover {
+.add-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.add-btn:hover:not(:disabled) {
   transform: rotate(90deg) scale(1.1);
 }
 
@@ -355,7 +460,12 @@ const saveToLocalStorage = () => {
   flex-shrink: 0;
 }
 
-.delete-btn:hover {
+.delete-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.delete-btn:hover:not(:disabled) {
   background: var(--primary);
   color: white;
   transform: scale(1.1);
